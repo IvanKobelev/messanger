@@ -8,6 +8,7 @@ alembic = "==1.7.7"
 fastapi = "==0.75.2"
 psycopg2-binary = "==2.9.3"
 pyjwt = "==2.3.0"
+requests = "==2.27.1"
 sqlalchemy = "==1.4.36"
 uvicorn = "==0.17.6"
 
