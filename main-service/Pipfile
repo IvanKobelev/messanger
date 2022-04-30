@@ -1,0 +1,19 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+alembic = "==1.7.7"
+fastapi = "==0.75.2"
+psycopg2-binary = "==2.9.3"
+pyjwt = "==2.3.0"
+sqlalchemy = "==1.4.36"
+uvicorn = "==0.17.6"
+
+[dev-packages]
+pytest = "==7.1.2"
+pytest-cov = "==3.0.0"
+
+[requires]
+python_version = "3.10"
