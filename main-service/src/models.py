@@ -1,9 +1,9 @@
 from datetime import datetime
 
-from sqlalchemy import ForeignKey, Integer, Enum, DateTime, String, Text, Column
+from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String, Text
 
 from src.database import Base
-from src.enums import ServiceUserRole, CompanyUserRole, ProjectUserRole
+from src.enums import CompanyUserRole, ProjectUserRole, ServiceUserRole
 
 
 class User(Base):
@@ -52,5 +52,5 @@ class ProjectUser(Base):
     id = Column(Integer, primary_key=True)
     project_id = Column(Integer, ForeignKey("project.id"), nullable=False)
     role = Column(Enum(ProjectUserRole, values_callable=lambda enum: [e.value for e in enum]),
-                       default=ProjectUserRole.user, nullable=False)
+                  default=ProjectUserRole.user, nullable=False)
     user_id = Column(Integer, ForeignKey("user.id"), nullable=False)
