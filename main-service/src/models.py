@@ -46,7 +46,15 @@ class User(Base):
         return new_user
 
     @classmethod
-    def get_by_login(scls, session: Session, login: str):
+    def get_by_id(cls, session: Session, id: int):
+        user = session.query(User).get(id)
+        if user is None:
+            raise NotFoundException("User not found.")
+
+        return user
+
+    @classmethod
+    def get_by_login(cls, session: Session, login: str):
         user = session.query(User).filter(User.login == login).first()
         if user is None:
             raise NotFoundException("User not found.")

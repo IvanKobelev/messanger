@@ -12,7 +12,7 @@ session = scoped_session(sessionmaker(bind=engine))
 Base = declarative_base()
 
 
-def get_session():
+def get_session():  # pragma: no cover
     try:
         yield session
     except Exception as err:

@@ -1,13 +1,15 @@
 import hashlib
+from datetime import datetime, timedelta
 from types import SimpleNamespace
 
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 
-from src.config import SQLALCHEMY_CONNECTION_URL
+from src.config import JWT_REFRESH_SECRET, SQLALCHEMY_CONNECTION_URL
 from src.database import get_session
 from src.enums import ServiceUserRole
 from src.models import Base, User
@@ -72,3 +74,25 @@ def db_with_one_user(db_empty):
     ))
     session.commit()
     return session
+
+
+@pytest.fixture
+def refresh_token():
+    payload = {
+        "id": 1,
+        "company_role": None,
+        "service_role": ServiceUserRole.user.value,
+        "exp": datetime.utcnow() + timedelta(days=30),
+    }
+    return jwt.encode(payload, JWT_REFRESH_SECRET)
+
+
+@pytest.fixture
+def expired_refresh_token():
+    payload = {
+        "id": 1,
+        "company_role": None,
+        "service_role": ServiceUserRole.user.value,
+        "exp": datetime.utcnow() - timedelta(days=30),
+    }
+    return jwt.encode(payload, JWT_REFRESH_SECRET)
