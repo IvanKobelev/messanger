@@ -6,11 +6,6 @@ from src.models import User
 from src.schemas import SignIn, SignUp, TokenData, UserOut, UserTokenOut
 
 
-def get_user_profile(token_data: TokenData, session: Session) -> UserOut:
-    user = User.get_by_id(session, token_data.id)
-    return UserOut.from_orm(user)
-
-
 def refresh_tokens(request: Request, response: Response, session: Session) -> UserTokenOut:
     token_data = security.get_refresh_token_data(request)
     user = User.get_by_id(session, token_data.id)
@@ -19,6 +14,11 @@ def refresh_tokens(request: Request, response: Response, session: Session) -> Us
     refresh_token = security.encode_refresh_token(updated_token_data)
     response.set_cookie("token", refresh_token, httponly=True)
     return UserTokenOut(user=UserOut.from_orm(user), token=access_token)
+
+
+def get_user_profile(token_data: TokenData, session: Session) -> UserOut:
+    user = User.get_by_id(session, token_data.id)
+    return UserOut.from_orm(user)
 
 
 def sign_up_user(user_data: SignUp, response: Response, session: Session) -> UserTokenOut:

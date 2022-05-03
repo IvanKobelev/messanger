@@ -33,17 +33,17 @@ def health_check():
     return "Hello, world!"
 
 
-@app.get("/profile", response_model=UserOut)
+@app.get("/refresh", response_model=UserTokenOut)
+def refresh_tokens(request: Request, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
+    return services.refresh_tokens(request, response, session)
+
+
+@app.get("/users/profile", response_model=UserOut)
 def get_user_profile(
     token_data: TokenData = Depends(get_access_token_data),
     session: Session = Depends(get_session),
 ) -> UserOut:
     return services.get_user_profile(token_data, session)
-
-
-@app.get("/refresh", response_model=UserTokenOut)
-def refresh_tokens(request: Request, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
-    return services.refresh_tokens(request, response, session)
 
 
 @app.post("/users/sign-up", response_model=UserTokenOut)

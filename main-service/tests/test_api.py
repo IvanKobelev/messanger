@@ -186,7 +186,7 @@ def test_refresh_tokens_user_not_found_returns_404(fixtures):
 def test_get_user_profile_returns_correct_response(fixtures):
     headers = {"Authorization": f"Bearer {fixtures.token}"}
 
-    result = fixtures.client.get("/profile", headers=headers)
+    result = fixtures.client.get("/users/profile", headers=headers)
 
     assert result.status_code == 200
     result_json = result.json()
@@ -203,7 +203,7 @@ def test_get_user_profile_returns_correct_response(fixtures):
 def test_get_user_profile_with_expired_token_returns_401(fixtures):
     headers = {"Authorization": f"Bearer {fixtures.token}"}
 
-    result = fixtures.client.get("/profile", headers=headers)
+    result = fixtures.client.get("/users/profile", headers=headers)
 
     assert result.status_code == 401
     assert result.json()["detail"] == "Token has expired."
@@ -212,7 +212,7 @@ def test_get_user_profile_with_expired_token_returns_401(fixtures):
 @pytest.mark.fixtures({"client": "client", "session": "db_with_one_user"})
 def test_get_user_profile_without_token_returns_403(fixtures):
 
-    result = fixtures.client.get("/profile")
+    result = fixtures.client.get("/users/profile")
 
     assert result.status_code == 403
     assert result.json()["detail"] == "Not authenticated"
@@ -222,7 +222,7 @@ def test_get_user_profile_without_token_returns_403(fixtures):
 def test_get_user_profile_with_invalid_token_returns_401(fixtures):
     headers = {"Authorization": f"Bearer {fixtures.token + 'a'}"}
 
-    result = fixtures.client.get("/profile", headers=headers)
+    result = fixtures.client.get("/users/profile", headers=headers)
 
     assert result.status_code == 401
     assert result.json()["detail"] == "Invalid token."
