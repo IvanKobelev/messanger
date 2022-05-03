@@ -1,24 +1,22 @@
-import os
-
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm.scoping import scoped_session
 
+from src.config import SQLALCHEMY_CONNECTION_URL
 
-SQLALCHEMY_CONNECTION_URL = os.environ.get("SQLALCHEMY_CONNECTION_URL")
 
 engine = create_engine(SQLALCHEMY_CONNECTION_URL)
-session = sessionmaker(bind=engine)
+session = scoped_session(sessionmaker(bind=engine))
 
 Base = declarative_base()
 
 
 def get_session():
-    db = session()
     try:
-        yield db
+        yield session
     except Exception as err:
-        db.rollback()
+        session.rollback()
         raise err
     finally:
-        db.close()
+        session.remove()
