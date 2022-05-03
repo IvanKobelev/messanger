@@ -14,6 +14,12 @@ class SignUp(BaseModel):
     second_name: str
 
 
+class SignIn(BaseModel):
+
+    login: str
+    password: str
+
+
 class UserOut(BaseModel):
 
     id: int

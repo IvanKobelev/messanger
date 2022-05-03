@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from src import services
 from src.database import get_session
-from src.exceptions import BadRequestException, UnauthorizedException
-from src.schemas import SignUp, UserTokenOut
+from src.exceptions import BadRequestException, NotFoundException, UnauthorizedException
+from src.schemas import SignIn, SignUp, UserTokenOut
 
 
 app = FastAPI()
@@ -21,6 +21,11 @@ def unauthorized_exception(request: Request, exc: UnauthorizedException) -> JSON
     return JSONResponse(status_code=401, content={"detail": exc.message})
 
 
+@app.exception_handler(NotFoundException)
+def not_found_exception(request: Request, exc: NotFoundException) -> JSONResponse:
+    return JSONResponse(status_code=404, content={"detail": exc.message})
+
+
 @app.get("/health-check")
 def health_check():
     """Health check main-service."""
@@ -28,5 +33,10 @@ def health_check():
 
 
 @app.post("/users/sign-up", response_model=UserTokenOut)
-def sign_up_user(user: SignUp, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
-    return services.sign_up_user(user, response, session)
+def sign_up_user(user_data: SignUp, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
+    return services.sign_up_user(user_data, response, session)
+
+
+@app.post("/users/sign-in", response_model=UserTokenOut)
+def sign_in_user(user_data: SignIn, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
+    return services.sign_in_user(user_data, response, session)

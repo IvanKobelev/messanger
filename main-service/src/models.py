@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from src.database import Base
 from src.enums import CompanyUserRole, ProjectUserRole, ServiceUserRole
-from src.exceptions import BadRequestException
+from src.exceptions import BadRequestException, NotFoundException, UnauthorizedException
 from src.schemas import SignUp
 
 
@@ -44,6 +44,18 @@ class User(Base):
             raise BadRequestException("Fields login or email are not unique.")
 
         return new_user
+
+    @classmethod
+    def get_by_login(scls, session: Session, login: str):
+        user = session.query(User).filter(User.login == login).first()
+        if user is None:
+            raise NotFoundException("User not found.")
+
+        return user
+
+    def compare_passwords(self, password):
+        if self.password != hashlib.sha256(password.encode()).hexdigest():
+            raise UnauthorizedException("Incorrect password.")
 
 
 class Company(Base):
