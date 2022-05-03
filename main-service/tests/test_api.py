@@ -3,7 +3,7 @@ import hashlib
 import jwt
 import pytest
 
-from src.config import JWT_ACCESS_SECRET
+from src.config import JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
 from src.enums import ServiceUserRole
 from src.models import User
 
@@ -36,10 +36,16 @@ def test_sign_up_user_returns_correct_response(fixtures):
     assert result_json["user"]["login"] == "login"
     assert result_json["user"]["second_name"] == "second name"
     assert result_json["user"]["service_role"] == ServiceUserRole.user.value
-    token = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
-    assert token["id"] == result_json["user"]["id"]
-    assert token["company_role"] is None
-    assert token["service_role"] == ServiceUserRole.user.value
+    access_token_data = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
+    assert access_token_data["id"] == result_json["user"]["id"]
+    assert access_token_data["company_role"] is None
+    assert access_token_data["service_role"] == ServiceUserRole.user.value
+
+    refresh_token = result.cookies.get_dict().get("token")
+    refresh_token_data = jwt.decode(refresh_token, JWT_REFRESH_SECRET, algorithms=["HS256"])
+    assert refresh_token_data["id"] == result_json["user"]["id"]
+    assert refresh_token_data["company_role"] is None
+    assert refresh_token_data["service_role"] == ServiceUserRole.user.value
 
 
 @pytest.mark.fixtures({"client": "client", "session": "db_empty"})
@@ -100,10 +106,16 @@ def test_sign_in_user_returns_correct_response(fixtures):
     assert result_json["user"]["login"] == "login"
     assert result_json["user"]["second_name"] == "second name"
     assert result_json["user"]["service_role"] == ServiceUserRole.user.value
-    token = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
-    assert token["id"] == result_json["user"]["id"]
-    assert token["company_role"] is None
-    assert token["service_role"] == ServiceUserRole.user.value
+    access_token_data = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
+    assert access_token_data["id"] == result_json["user"]["id"]
+    assert access_token_data["company_role"] is None
+    assert access_token_data["service_role"] == ServiceUserRole.user.value
+
+    refresh_token = result.cookies.get_dict().get("token")
+    refresh_token_data = jwt.decode(refresh_token, JWT_REFRESH_SECRET, algorithms=["HS256"])
+    assert refresh_token_data["id"] == result_json["user"]["id"]
+    assert refresh_token_data["company_role"] is None
+    assert refresh_token_data["service_role"] == ServiceUserRole.user.value
 
 
 @pytest.mark.fixtures({"client": "client", "session": "db_with_one_user"})
@@ -147,10 +159,16 @@ def test_refresh_tokens_returns_correct_response(fixtures):
     assert result_json["user"]["login"] == "login"
     assert result_json["user"]["second_name"] == "second name"
     assert result_json["user"]["service_role"] == ServiceUserRole.user.value
-    token = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
-    assert token["id"] == result_json["user"]["id"]
-    assert token["company_role"] is None
-    assert token["service_role"] == ServiceUserRole.user.value
+    access_token_data = jwt.decode(result_json["token"], JWT_ACCESS_SECRET, algorithms=["HS256"])
+    assert access_token_data["id"] == result_json["user"]["id"]
+    assert access_token_data["company_role"] is None
+    assert access_token_data["service_role"] == ServiceUserRole.user.value
+
+    refresh_token = result.cookies.get_dict().get("token")
+    refresh_token_data = jwt.decode(refresh_token, JWT_REFRESH_SECRET, algorithms=["HS256"])
+    assert refresh_token_data["id"] == result_json["user"]["id"]
+    assert refresh_token_data["company_role"] is None
+    assert refresh_token_data["service_role"] == ServiceUserRole.user.value
 
 
 @pytest.mark.fixtures({"client": "client", "session": "db_with_one_user"})
@@ -226,3 +244,13 @@ def test_get_user_profile_with_invalid_token_returns_401(fixtures):
 
     assert result.status_code == 401
     assert result.json()["detail"] == "Invalid token."
+
+
+@pytest.mark.fixtures({"client": "client", "session": "db_with_one_user", "token": "refresh_token"})
+def test_sign_out_user(fixtures):
+    cookies = {"token": fixtures.token}
+
+    result = fixtures.client.get("/users/sign-out", cookies=cookies)
+
+    assert result.cookies.get_dict() == {}
+    assert result.status_code == 200

@@ -54,3 +54,8 @@ def sign_up_user(user_data: SignUp, response: Response, session: Session = Depen
 @app.post("/users/sign-in", response_model=UserTokenOut)
 def sign_in_user(user_data: SignIn, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
     return services.sign_in_user(user_data, response, session)
+
+
+@app.get("/users/sign-out")
+def sign_out_user(response: Response) -> None:
+    return services.sign_out_user(response)
