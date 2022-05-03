@@ -13,3 +13,8 @@ class BadRequestException(InternalException):
 class UnauthorizedException(InternalException):
 
     pass
+
+
+class NotFoundException(InternalException):
+
+    pass
