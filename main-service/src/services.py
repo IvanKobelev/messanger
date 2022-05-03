@@ -38,3 +38,7 @@ def sign_in_user(user_data: SignIn, response: Response, session: Session) -> Use
     refresh_token = security.encode_refresh_token(token_data)
     response.set_cookie("token", refresh_token, httponly=True)
     return UserTokenOut(user=UserOut.from_orm(user), token=access_token)
+
+
+def sign_out_user(response: Response) -> None:
+    response.delete_cookie("token")
