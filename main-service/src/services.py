@@ -6,6 +6,11 @@ from src.models import User
 from src.schemas import SignIn, SignUp, TokenData, UserOut, UserTokenOut
 
 
+def get_user_profile(token_data: TokenData, session: Session) -> UserOut:
+    user = User.get_by_id(session, token_data.id)
+    return UserOut.from_orm(user)
+
+
 def refresh_tokens(request: Request, response: Response, session: Session) -> UserTokenOut:
     token_data = security.get_refresh_token_data(request)
     user = User.get_by_id(session, token_data.id)

@@ -180,3 +180,49 @@ def test_refresh_tokens_user_not_found_returns_404(fixtures):
 
     assert result.status_code == 404
     assert result.json()["detail"] == "User not found."
+
+
+@pytest.mark.fixtures({"client": "client", "session": "db_with_one_user", "token": "access_token"})
+def test_get_user_profile_returns_correct_response(fixtures):
+    headers = {"Authorization": f"Bearer {fixtures.token}"}
+
+    result = fixtures.client.get("/profile", headers=headers)
+
+    assert result.status_code == 200
+    result_json = result.json()
+    assert result_json["company_id"] is None
+    assert result_json["company_role"] is None
+    assert result_json["email"] == "test@mail.com"
+    assert result_json["first_name"] == "first name"
+    assert result_json["login"] == "login"
+    assert result_json["second_name"] == "second name"
+    assert result_json["service_role"] == ServiceUserRole.user.value
+
+
+@pytest.mark.fixtures({"client": "client", "session": "db_with_one_user", "token": "expired_access_token"})
+def test_get_user_profile_with_expired_token_returns_401(fixtures):
+    headers = {"Authorization": f"Bearer {fixtures.token}"}
+
+    result = fixtures.client.get("/profile", headers=headers)
+
+    assert result.status_code == 401
+    assert result.json()["detail"] == "Token has expired."
+
+
+@pytest.mark.fixtures({"client": "client", "session": "db_with_one_user"})
+def test_get_user_profile_without_token_returns_403(fixtures):
+
+    result = fixtures.client.get("/profile")
+
+    assert result.status_code == 403
+    assert result.json()["detail"] == "Not authenticated"
+
+
+@pytest.mark.fixtures({"client": "client", "session": "db_with_one_user", "token": "access_token"})
+def test_get_user_profile_with_invalid_token_returns_401(fixtures):
+    headers = {"Authorization": f"Bearer {fixtures.token + 'a'}"}
+
+    result = fixtures.client.get("/profile", headers=headers)
+
+    assert result.status_code == 401
+    assert result.json()["detail"] == "Invalid token."
