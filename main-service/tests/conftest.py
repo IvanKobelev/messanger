@@ -9,7 +9,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.scoping import scoped_session
 
-from src.config import JWT_REFRESH_SECRET, SQLALCHEMY_CONNECTION_URL
+from src.config import JWT_ACCESS_SECRET, JWT_REFRESH_SECRET, SQLALCHEMY_CONNECTION_URL
 from src.database import get_session
 from src.enums import ServiceUserRole
 from src.models import Base, User
@@ -96,3 +96,25 @@ def expired_refresh_token():
         "exp": datetime.utcnow() - timedelta(days=30),
     }
     return jwt.encode(payload, JWT_REFRESH_SECRET)
+
+
+@pytest.fixture
+def access_token():
+    payload = {
+        "id": 1,
+        "company_role": None,
+        "service_role": ServiceUserRole.user.value,
+        "exp": datetime.utcnow() + timedelta(minutes=30),
+    }
+    return jwt.encode(payload, JWT_ACCESS_SECRET)
+
+
+@pytest.fixture
+def expired_access_token():
+    payload = {
+        "id": 1,
+        "company_role": None,
+        "service_role": ServiceUserRole.user.value,
+        "exp": datetime.utcnow() - timedelta(minutes=30),
+    }
+    return jwt.encode(payload, JWT_ACCESS_SECRET)

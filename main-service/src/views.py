@@ -5,7 +5,8 @@ from sqlalchemy.orm import Session
 from src import services
 from src.database import get_session
 from src.exceptions import BadRequestException, NotFoundException, UnauthorizedException
-from src.schemas import SignIn, SignUp, UserTokenOut
+from src.schemas import SignIn, SignUp, TokenData, UserOut, UserTokenOut
+from src.security import get_access_token_data
 
 
 app = FastAPI()
@@ -30,6 +31,14 @@ def not_found_exception(request: Request, exc: NotFoundException) -> JSONRespons
 def health_check():
     """Health check main-service."""
     return "Hello, world!"
+
+
+@app.get("/profile", response_model=UserOut)
+def get_user_profile(
+    token_data: TokenData = Depends(get_access_token_data),
+    session: Session = Depends(get_session),
+) -> UserOut:
+    return services.get_user_profile(token_data, session)
 
 
 @app.get("/refresh", response_model=UserTokenOut)
