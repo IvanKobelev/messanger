@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 
 import jwt
-from fastapi import Depends
+from fastapi import Depends, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.config import JWT_ACCESS_SECRET, JWT_REFRESH_SECRET
@@ -12,9 +12,20 @@ from src.schemas import TokenData
 http_bearer = HTTPBearer()
 
 
-def get_user_from_token(token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> TokenData:
+def get_access_token_data(token: HTTPAuthorizationCredentials = Depends(http_bearer)) -> TokenData:
     try:
         decoded = jwt.decode(token.credentials, JWT_ACCESS_SECRET, algorithms=["HS256"])
+    except jwt.exceptions.DecodeError:
+        raise UnauthorizedException("Invalid token.")
+    except jwt.exceptions.ExpiredSignatureError:
+        raise UnauthorizedException("Token has expired.")
+    return TokenData.parse_obj(decoded)
+
+
+def get_refresh_token_data(request: Request) -> TokenData:
+    token = request.cookies.get("token")
+    try:
+        decoded = jwt.decode(token, JWT_REFRESH_SECRET, algorithms=["HS256"])
     except jwt.exceptions.DecodeError:
         raise UnauthorizedException("Invalid token.")
     except jwt.exceptions.ExpiredSignatureError:

@@ -32,6 +32,11 @@ def health_check():
     return "Hello, world!"
 
 
+@app.get("/refresh", response_model=UserTokenOut)
+def refresh_tokens(request: Request, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
+    return services.refresh_tokens(request, response, session)
+
+
 @app.post("/users/sign-up", response_model=UserTokenOut)
 def sign_up_user(user_data: SignUp, response: Response, session: Session = Depends(get_session)) -> UserTokenOut:
     return services.sign_up_user(user_data, response, session)
